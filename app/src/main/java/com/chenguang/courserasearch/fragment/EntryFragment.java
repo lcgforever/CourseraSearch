@@ -34,6 +34,12 @@ public class EntryFragment extends Fragment implements EntryAdapter.EntryClickLi
         void loadMoreData();
     }
 
+    public enum SortType {
+        SORT_BY_NAME,
+        SORT_BY_SCORE,
+        SORT_BY_TYPE
+    }
+
     public static EntryFragment newInstance(boolean shouldShowHeader) {
         EntryFragment fragment = new EntryFragment();
         fragment.setRetainInstance(true);
@@ -126,5 +132,9 @@ public class EntryFragment extends Fragment implements EntryAdapter.EntryClickLi
 
     public void updateTotalCount(int totalCount) {
         entryAdapter.updateTotalCount(totalCount);
+    }
+
+    public void sort(SortType sortType) {
+        entryAdapter.sort(sortType);
     }
 }

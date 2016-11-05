@@ -8,7 +8,6 @@ import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -130,6 +129,9 @@ public class SearchActivity extends BaseActivity implements View.OnClickListener
         Menu actionMenu = actionMenuView.getMenu();
         actionMenu.clear();
         getMenuInflater().inflate(R.menu.menu_activity_search, actionMenu);
+        actionMenu.findItem(R.id.menu_sort_by_name).setVisible(hasSearched);
+        actionMenu.findItem(R.id.menu_sort_by_score).setVisible(hasSearched);
+        actionMenu.findItem(R.id.menu_sort_by_type).setVisible(hasSearched);
         return true;
     }
 
@@ -144,9 +146,28 @@ public class SearchActivity extends BaseActivity implements View.OnClickListener
 
     @Override
     public boolean onMenuItemClick(MenuItem item) {
+        EntryFragment entryFragment = (EntryFragment) getSupportFragmentManager().findFragmentByTag(TAG_ENTRY_FRAGMENT);
         switch (item.getItemId()) {
             case R.id.menu_search:
                 showSearchView();
+                return true;
+
+            case R.id.menu_sort_by_name:
+                if (entryFragment != null) {
+                    entryFragment.sort(EntryFragment.SortType.SORT_BY_NAME);
+                }
+                return true;
+
+            case R.id.menu_sort_by_score:
+                if (entryFragment != null) {
+                    entryFragment.sort(EntryFragment.SortType.SORT_BY_SCORE);
+                }
+                return true;
+
+            case R.id.menu_sort_by_type:
+                if (entryFragment != null) {
+                    entryFragment.sort(EntryFragment.SortType.SORT_BY_TYPE);
+                }
                 return true;
         }
         return false;
@@ -214,6 +235,7 @@ public class SearchActivity extends BaseActivity implements View.OnClickListener
 
     private void searchForKeyword(String keyword, int startIndex, final boolean isSameQuery) {
         hasSearched = true;
+        invalidateOptionsMenu();
         progressBar.setVisibility(View.VISIBLE);
         Call<QueryResult> resultCall = queryApi.getQueryResult(keyword, startIndex, QUERY_LIMIT_NUMBER);
         resultCall.enqueue(new Callback<QueryResult>() {
@@ -237,7 +259,6 @@ public class SearchActivity extends BaseActivity implements View.OnClickListener
             public void onFailure(Call<QueryResult> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 t.printStackTrace();
-                Log.e("findme", "error: " + t.getMessage());
                 showErrorMessage(String.format(getString(R.string.rest_call_error_message), t.getMessage()));
             }
         });
@@ -326,6 +347,7 @@ public class SearchActivity extends BaseActivity implements View.OnClickListener
             if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_NONE) {
                 KeyboardUtils.hideKeyboard(SearchActivity.this);
                 searchForKeyword(searchEditText.getText().toString(), 0, false);
+                hideSearchView();
                 return true;
             }
             return false;

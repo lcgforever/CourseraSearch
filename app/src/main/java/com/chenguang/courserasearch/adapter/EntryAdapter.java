@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.chenguang.courserasearch.R;
+import com.chenguang.courserasearch.fragment.EntryFragment;
 import com.chenguang.courserasearch.model.CourseDetails;
 import com.chenguang.courserasearch.model.EntryDetails;
 import com.chenguang.courserasearch.model.SpecializationDetails;
@@ -18,6 +19,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.BaseViewHolder> {
@@ -152,6 +154,50 @@ public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.BaseViewHold
     public void updateTotalCount(int totalCount) {
         this.totalCount = totalCount;
         notifyItemChanged(0);
+    }
+
+    public void sort(EntryFragment.SortType sortType) {
+        switch (sortType) {
+            case SORT_BY_NAME:
+                Collections.sort(this.entryDetailsList, new Comparator<EntryDetails>() {
+                    @Override
+                    public int compare(EntryDetails o1, EntryDetails o2) {
+                        return o1.getName().compareTo(o2.getName());
+                    }
+                });
+                notifyDataSetChanged();
+                break;
+
+            case SORT_BY_SCORE:
+                Collections.sort(this.entryDetailsList, new Comparator<EntryDetails>() {
+                    @Override
+                    public int compare(EntryDetails o1, EntryDetails o2) {
+                        double score1 = o1.getScore(), score2 = o2.getScore();
+                        if (score1 > score2) {
+                            return -1;
+                        } else if (score1 < score2) {
+                            return 1;
+                        }
+                        return 0;
+                    }
+                });
+                notifyDataSetChanged();
+                break;
+
+            case SORT_BY_TYPE:
+                Collections.sort(this.entryDetailsList, new Comparator<EntryDetails>() {
+                    @Override
+                    public int compare(EntryDetails o1, EntryDetails o2) {
+                        boolean isCourse1 = o1 instanceof CourseDetails, isCourse2 = o2 instanceof CourseDetails;
+                        if (isCourse1 == isCourse2) {
+                            return o1.getName().compareTo(o2.getName());
+                        }
+                        return isCourse1 ? 1 : -1;
+                    }
+                });
+                notifyDataSetChanged();
+                break;
+        }
     }
 
 

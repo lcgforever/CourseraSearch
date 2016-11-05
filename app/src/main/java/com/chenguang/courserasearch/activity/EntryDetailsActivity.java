@@ -8,7 +8,6 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -131,7 +130,6 @@ public class EntryDetailsActivity extends BaseActivity implements View.OnClickLi
                 public void onFailure(Call<CourseQueryResult> call, Throwable t) {
                     swipeRefreshLayout.setRefreshing(false);
                     t.printStackTrace();
-                    Log.e("findme", "error: " + t.getMessage());
                     showErrorMessage(String.format(getString(R.string.rest_call_error_message), t.getMessage()));
                 }
             });
@@ -154,7 +152,6 @@ public class EntryDetailsActivity extends BaseActivity implements View.OnClickLi
                 public void onFailure(Call<SpecializationQueryResult> call, Throwable t) {
                     swipeRefreshLayout.setRefreshing(false);
                     t.printStackTrace();
-                    Log.e("findme", "error: " + t.getMessage());
                     showErrorMessage(String.format(getString(R.string.rest_call_error_message), t.getMessage()));
                 }
             });
