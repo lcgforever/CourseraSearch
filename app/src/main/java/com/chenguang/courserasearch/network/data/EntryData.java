@@ -13,6 +13,9 @@ public class EntryData {
     @SerializedName("name")
     private String name;
 
+    @SerializedName("description")
+    private String description;
+
     @SerializedName("slug")
     private String slug;
 
@@ -28,6 +31,10 @@ public class EntryData {
 
     public String getName() {
         return name;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public String getSlug() {

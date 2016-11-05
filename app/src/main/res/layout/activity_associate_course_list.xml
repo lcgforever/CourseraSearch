@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".activity.AssociateCourseListActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/associate_course_list_activity_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:navigationIcon="@drawable/ic_back_white"
+        app:title="@string/associate_course_list_activity_title"
+        app:titleTextAppearance="@style/ToolbarTitleTextAppearance" />
+
+    <FrameLayout
+        android:id="@+id/associate_course_list_activity_content_frame_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</LinearLayout>

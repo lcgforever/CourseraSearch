@@ -5,13 +5,15 @@ import android.support.annotation.Nullable;
 import com.chenguang.courserasearch.network.data.EntryData;
 import com.chenguang.courserasearch.network.data.PartnerData;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EntryDetails implements Comparable<EntryDetails> {
+public class EntryDetails implements Comparable<EntryDetails>, Serializable {
 
     private String id;
     private String name;
+    private String description;
     private String slug;
     private double score;
     private List<PartnerData> partnerDataList;
@@ -22,6 +24,7 @@ public class EntryDetails implements Comparable<EntryDetails> {
     public EntryDetails(EntryData entryData) {
         this.id = entryData.getId();
         this.name = entryData.getName();
+        this.description = entryData.getDescription();
         this.slug = entryData.getSlug();
         this.partnerDataList = new ArrayList<>();
     }
@@ -54,6 +57,14 @@ public class EntryDetails implements Comparable<EntryDetails> {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getSlug() {

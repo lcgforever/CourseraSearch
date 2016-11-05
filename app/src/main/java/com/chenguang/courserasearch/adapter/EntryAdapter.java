@@ -20,69 +20,116 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.EntryViewHolder> {
+public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.BaseViewHolder> {
+
+    private static final int TYPE_HEADER_VIEW = 0;
+    private static final int TYPE_ENTRY_VIEW = 1;
 
     private Context context;
     private List<EntryDetails> entryDetailsList;
+    private int totalCount;
+    private boolean shouldShowHeader;
+    private EntryClickListener entryClickListener;
 
-    public EntryAdapter(Context context, List<EntryDetails> entryDetailsList) {
+    public interface EntryClickListener {
+        void onEntryClicked(EntryDetails entryDetails);
+    }
+
+    public EntryAdapter(Context context, List<EntryDetails> entryDetailsList, int totalCount, boolean shouldShowHeader, EntryClickListener entryClickListener) {
         this.context = context;
         Collections.sort(entryDetailsList);
         this.entryDetailsList = new ArrayList<>();
         this.entryDetailsList.addAll(entryDetailsList);
+        this.totalCount = totalCount;
+        this.shouldShowHeader = shouldShowHeader;
+        this.entryClickListener = entryClickListener;
     }
 
     @Override
-    public EntryViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.layout_entry_card_view, parent, false);
-        return new EntryViewHolder(view);
-    }
+    public BaseViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        switch (viewType) {
+            case TYPE_HEADER_VIEW:
+                View headerView = LayoutInflater.from(context).inflate(R.layout.layout_entry_header_view, parent, false);
+                return new HeaderViewHolder(headerView);
 
-    @Override
-    public void onBindViewHolder(EntryViewHolder holder, int position) {
-        EntryDetails entryDetails = entryDetailsList.get(position);
-
-        holder.nameTextView.setText(entryDetails.getName());
-        if (!entryDetails.getPartnerDataList().isEmpty()) {
-            StringBuilder stringBuilder = new StringBuilder();
-            for (PartnerData partnerData : entryDetails.getPartnerDataList()) {
-                stringBuilder.append(partnerData.getName()).append(", ");
-            }
-            holder.partnerNameTextView.setText(stringBuilder.substring(0, stringBuilder.length() - 2));
+            case TYPE_ENTRY_VIEW:
+            default:
+                View entryView = LayoutInflater.from(context).inflate(R.layout.layout_entry_card_view, parent, false);
+                return new EntryViewHolder(entryView);
         }
+    }
 
-        if (entryDetails instanceof CourseDetails) {
-            CourseDetails courseDetails = (CourseDetails) entryDetails;
-            if (!TextUtils.isEmpty(courseDetails.getPhotoUrl())) {
-                Picasso.with(context)
-                        .load(courseDetails.getPhotoUrl())
-                        .placeholder(R.drawable.ic_no_image_placeholder)
-                        .error(R.drawable.ic_no_image_placeholder)
-                        .into(holder.photoImageView);
-            }
-            holder.courseNumberTextView.setVisibility(View.GONE);
+    @Override
+    public void onBindViewHolder(BaseViewHolder holder, int position) {
+        if (holder instanceof HeaderViewHolder) {
+            HeaderViewHolder headerViewHolder = (HeaderViewHolder) holder;
+            headerViewHolder.totalCountTextView.setText(context.getResources().getQuantityString(
+                    R.plurals.entry_list_total_count_text, totalCount, totalCount));
         } else {
-            SpecializationDetails specializationDetails = (SpecializationDetails) entryDetails;
-            int courseNumber = specializationDetails.getCourseDetailsList().size();
-            if (courseNumber > 0) {
-                CourseDetails firstCourseDetails = specializationDetails.getCourseDetailsList().get(0);
-                if (!TextUtils.isEmpty(firstCourseDetails.getPhotoUrl())) {
+            int correctPosition = shouldShowHeader ? position - 1 : position;
+            EntryDetails entryDetails = entryDetailsList.get(correctPosition);
+            EntryViewHolder entryViewHolder = (EntryViewHolder) holder;
+
+            entryViewHolder.nameTextView.setText(entryDetails.getName());
+            if (!entryDetails.getPartnerDataList().isEmpty()) {
+                StringBuilder stringBuilder = new StringBuilder();
+                for (PartnerData partnerData : entryDetails.getPartnerDataList()) {
+                    stringBuilder.append(partnerData.getName()).append(", ");
+                }
+                entryViewHolder.partnerNameTextView.setText(stringBuilder.substring(0, stringBuilder.length() - 2));
+            }
+
+            if (entryDetails instanceof CourseDetails) {
+                CourseDetails courseDetails = (CourseDetails) entryDetails;
+                if (!TextUtils.isEmpty(courseDetails.getPhotoUrl())) {
                     Picasso.with(context)
-                            .load(firstCourseDetails.getPhotoUrl())
+                            .load(courseDetails.getPhotoUrl())
                             .placeholder(R.drawable.ic_no_image_placeholder)
                             .error(R.drawable.ic_no_image_placeholder)
-                            .into(holder.photoImageView);
+                            .into(entryViewHolder.photoImageView);
                 }
+                entryViewHolder.courseNumberTextView.setVisibility(View.GONE);
+            } else {
+                SpecializationDetails specializationDetails = (SpecializationDetails) entryDetails;
+                int courseNumber = specializationDetails.getCourseDetailsList().size();
+                if (!TextUtils.isEmpty(specializationDetails.getLogo())) {
+                    Picasso.with(context)
+                            .load(specializationDetails.getLogo())
+                            .placeholder(R.drawable.ic_no_image_placeholder)
+                            .error(R.drawable.ic_no_image_placeholder)
+                            .into(entryViewHolder.photoImageView);
+                }
+                entryViewHolder.courseNumberTextView.setText(context.getResources().getQuantityString(
+                        R.plurals.course_number_text, courseNumber, courseNumber));
+                entryViewHolder.courseNumberTextView.setVisibility(View.VISIBLE);
             }
-            holder.courseNumberTextView.setText(context.getResources().getQuantityString(
-                    R.plurals.course_number_text, courseNumber, courseNumber));
-            holder.courseNumberTextView.setVisibility(View.VISIBLE);
         }
     }
 
     @Override
     public int getItemCount() {
-        return entryDetailsList == null ? 0 : entryDetailsList.size();
+        if (entryDetailsList == null || entryDetailsList.isEmpty()) {
+            return 0;
+        }
+        return shouldShowHeader ? entryDetailsList.size() + 1 : entryDetailsList.size();
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (shouldShowHeader) {
+            return position == 0 ? TYPE_HEADER_VIEW : TYPE_ENTRY_VIEW;
+        } else {
+            return TYPE_ENTRY_VIEW;
+        }
+    }
+
+    public void updateEntryDetailsList(List<EntryDetails> entryDetailsList) {
+        if (entryDetailsList != null) {
+            Collections.sort(entryDetailsList);
+            this.entryDetailsList.clear();
+            this.entryDetailsList.addAll(entryDetailsList);
+            notifyDataSetChanged();
+        }
     }
 
     public void appendEntryDetailsList(List<EntryDetails> entryDetailsList) {
@@ -93,13 +140,45 @@ public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.EntryViewHol
         }
     }
 
+    public void updateCourseDetailsList(List<CourseDetails> courseDetailsList) {
+        if (courseDetailsList != null) {
+            Collections.sort(courseDetailsList);
+            this.entryDetailsList.clear();
+            this.entryDetailsList.addAll(courseDetailsList);
+            notifyDataSetChanged();
+        }
+    }
 
-    class EntryViewHolder extends RecyclerView.ViewHolder {
+    public void updateTotalCount(int totalCount) {
+        this.totalCount = totalCount;
+        notifyItemChanged(0);
+    }
 
-        ImageView photoImageView;
-        TextView courseNumberTextView;
-        TextView nameTextView;
-        TextView partnerNameTextView;
+
+    class BaseViewHolder extends RecyclerView.ViewHolder {
+
+        BaseViewHolder(View itemView) {
+            super(itemView);
+        }
+    }
+
+    private class HeaderViewHolder extends BaseViewHolder {
+
+        private TextView totalCountTextView;
+
+        HeaderViewHolder(View itemView) {
+            super(itemView);
+
+            totalCountTextView = (TextView) itemView.findViewById(R.id.entry_header_count_text_view);
+        }
+    }
+
+    private class EntryViewHolder extends BaseViewHolder implements View.OnClickListener {
+
+        private ImageView photoImageView;
+        private TextView courseNumberTextView;
+        private TextView nameTextView;
+        private TextView partnerNameTextView;
 
         EntryViewHolder(View itemView) {
             super(itemView);
@@ -108,6 +187,14 @@ public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.EntryViewHol
             courseNumberTextView = (TextView) itemView.findViewById(R.id.entry_course_number_text_view);
             nameTextView = (TextView) itemView.findViewById(R.id.entry_name_text_view);
             partnerNameTextView = (TextView) itemView.findViewById(R.id.entry_partner_name_text_view);
+
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            int position = shouldShowHeader ? getAdapterPosition() - 1 : getAdapterPosition();
+            entryClickListener.onEntryClicked(entryDetailsList.get(position));
         }
     }
 }

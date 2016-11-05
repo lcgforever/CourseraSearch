@@ -18,6 +18,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
@@ -46,20 +47,29 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class SearchActivity extends BaseActivity implements View.OnClickListener, ActionMenuView.OnMenuItemClickListener {
+public class SearchActivity extends BaseActivity implements View.OnClickListener,
+        ActionMenuView.OnMenuItemClickListener, EntryFragment.EntryLoadListener {
 
+    private static final String EXTRA_HAS_SEARCHED = "EXTRA_HAS_SEARCHED";
+    private static final String EXTRA_QUERY_START_INDEX = "EXTRA_QUERY_START_INDEX";
+    private static final String EXTRA_QUERY_TOTAL_COUNT = "EXTRA_QUERY_TOTAL_COUNT";
     private static final String TAG_ENTRY_FRAGMENT = "TAG_ENTRY_FRAGMENT";
     private static final String EMPTY_SEARCH_TEXT = "";
     private static final int DISPLAY_MAIN_CONTENT_CHILD = 1;
+    private static final int QUERY_LIMIT_NUMBER = 10;
 
     private Toolbar toolbar;
     private ActionMenuView actionMenuView;
+    private ProgressBar progressBar;
     private ViewSwitcher mainContentViewSwitcher;
     private LinearLayout searchViewContainer;
     private EditText searchEditText;
     private ImageButton clearSearchButton;
 
     private RestApi.QueryApi queryApi;
+    private int queryStartIndex;
+    private int queryTotalCount;
+    private boolean hasSearched;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +84,7 @@ public class SearchActivity extends BaseActivity implements View.OnClickListener
         supportActionBar.setDisplayShowHomeEnabled(false);
 
         actionMenuView = (ActionMenuView) findViewById(R.id.action_menu_view);
+        progressBar = (ProgressBar) findViewById(R.id.search_activity_progress_bar);
         mainContentViewSwitcher = (ViewSwitcher) findViewById(R.id.search_activity_view_switcher);
         searchViewContainer = (LinearLayout) findViewById(R.id.search_bar_container);
         clearSearchButton = (ImageButton) findViewById(R.id.clear_search_text_button);
@@ -90,10 +101,28 @@ public class SearchActivity extends BaseActivity implements View.OnClickListener
         queryApi = restApi.getQueryApi();
 
         if (savedInstanceState == null) {
+            hasSearched = false;
+            queryStartIndex = 0;
+            queryTotalCount = 1;
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.content_frame_layout, EntryFragment.newInstance(), TAG_ENTRY_FRAGMENT)
+                    .replace(R.id.content_frame_layout, EntryFragment.newInstance(true), TAG_ENTRY_FRAGMENT)
                     .commit();
+        } else {
+            hasSearched = savedInstanceState.getBoolean(EXTRA_HAS_SEARCHED, false);
+            queryStartIndex = savedInstanceState.getInt(EXTRA_QUERY_START_INDEX, 0);
+            queryTotalCount = savedInstanceState.getInt(EXTRA_QUERY_TOTAL_COUNT, 1);
+            if (hasSearched) {
+                mainContentViewSwitcher.setDisplayedChild(DISPLAY_MAIN_CONTENT_CHILD);
+            }
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean(EXTRA_HAS_SEARCHED, hasSearched);
+        outState.putInt(EXTRA_QUERY_START_INDEX, queryStartIndex);
+        outState.putInt(EXTRA_QUERY_TOTAL_COUNT, queryTotalCount);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -137,6 +166,13 @@ public class SearchActivity extends BaseActivity implements View.OnClickListener
         }
     }
 
+    @Override
+    public void loadMoreData() {
+        if (queryStartIndex < queryTotalCount) {
+            searchForKeyword(searchEditText.getText().toString(), queryStartIndex, true);
+        }
+    }
+
     private void showSearchView() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             int centerX = (int) actionMenuView.getX() + actionMenuView.getWidth() / 2;
@@ -176,26 +212,30 @@ public class SearchActivity extends BaseActivity implements View.OnClickListener
         KeyboardUtils.hideKeyboard(this);
     }
 
-    private void searchForKeyword(String keyword, int startIndex, int limitNumber) {
-        Log.e("findme", "making rest call");
-        Call<QueryResult> resultCall = queryApi.getQueryResult(keyword, startIndex, limitNumber);
+    private void searchForKeyword(String keyword, int startIndex, final boolean isSameQuery) {
+        hasSearched = true;
+        progressBar.setVisibility(View.VISIBLE);
+        Call<QueryResult> resultCall = queryApi.getQueryResult(keyword, startIndex, QUERY_LIMIT_NUMBER);
         resultCall.enqueue(new Callback<QueryResult>() {
             @Override
             public void onResponse(Call<QueryResult> call, Response<QueryResult> response) {
-                Log.e("findme", "Get response back: " + response.raw().toString());
-                try {
-                    QueryResult queryResult = response.body();
-                    List<EntryDetails> entryDetailsList = loadQueryResultData(queryResult);
-                    EntryFragment entryFragment = (EntryFragment) getSupportFragmentManager().findFragmentByTag(TAG_ENTRY_FRAGMENT);
+                progressBar.setVisibility(View.GONE);
+                QueryResult queryResult = response.body();
+                queryTotalCount = queryResult.getPagingData().getTotal();
+                queryStartIndex += QUERY_LIMIT_NUMBER;
+                List<EntryDetails> entryDetailsList = loadQueryResultData(queryResult);
+                EntryFragment entryFragment = (EntryFragment) getSupportFragmentManager().findFragmentByTag(TAG_ENTRY_FRAGMENT);
+                if (isSameQuery) {
+                    entryFragment.appendEntryDetailsList(entryDetailsList);
+                } else {
                     entryFragment.updateEntryDetailsList(entryDetailsList);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Log.e("findme", "exception: " + e.getMessage());
                 }
+                entryFragment.updateTotalCount(queryTotalCount);
             }
 
             @Override
             public void onFailure(Call<QueryResult> call, Throwable t) {
+                progressBar.setVisibility(View.GONE);
                 t.printStackTrace();
                 Log.e("findme", "error: " + t.getMessage());
                 showErrorMessage(String.format(getString(R.string.rest_call_error_message), t.getMessage()));
@@ -285,7 +325,7 @@ public class SearchActivity extends BaseActivity implements View.OnClickListener
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
             if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_NONE) {
                 KeyboardUtils.hideKeyboard(SearchActivity.this);
-                searchForKeyword(searchEditText.getText().toString(), 0, 10);
+                searchForKeyword(searchEditText.getText().toString(), 0, false);
                 return true;
             }
             return false;

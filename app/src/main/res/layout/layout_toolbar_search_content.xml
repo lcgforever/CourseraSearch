@@ -15,7 +15,7 @@
         android:lines="1"
         android:maxWidth="200dp"
         android:text="@string/app_name"
-        android:textAppearance="@style/ToolbarTextAppearance" />
+        android:textAppearance="@style/ToolbarTitleTextAppearance" />
 
     <android.support.v7.widget.ActionMenuView
         android:id="@+id/action_menu_view"

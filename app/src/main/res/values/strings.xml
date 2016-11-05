@@ -3,6 +3,9 @@
     <!-- General Strings -->
     <string name="app_name">CourseraSearch</string>
     <string name="menu_search">Search</string>
+    <string name="menu_sort_by_score">Sort by relevance</string>
+    <string name="menu_sort_by_name">Sory by name</string>
+    <string name="menu_sort_by_type">Sory by type</string>
     <string name="action_retry">Retry</string>
 
     <!-- Search Activity -->
@@ -11,7 +14,13 @@
     <string name="rest_call_error_message">An error occurred: %s Please retry.</string>
 
     <!-- Entry Fragment -->
-    <string name="entry_list_empty_text">No matching result for "%s"</string>
+    <string name="entry_list_empty_text">No matching result found</string>
+
+    <!-- Entry Details Activity -->
+    <string name="view_courses_text">Click to view associated courses</string>
+
+    <!-- Associate Course List Activity -->
+    <string name="associate_course_list_activity_title">Associate Courses</string>
 
     <!-- Error Messages -->
     <string name="network_error_message">Network connection lost. Please reconnect!</string>

@@ -8,4 +8,19 @@
         android:title="@string/menu_search"
         app:showAsAction="always" />
 
+    <item
+        android:id="@+id/menu_sort_by_name"
+        android:title="@string/menu_sort_by_name"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_sort_by_score"
+        android:title="@string/menu_sort_by_score"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_sort_by_type"
+        android:title="@string/menu_sort_by_type"
+        app:showAsAction="never" />
+
 </menu>

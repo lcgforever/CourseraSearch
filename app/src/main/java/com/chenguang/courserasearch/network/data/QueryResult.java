@@ -10,6 +10,9 @@ public class QueryResult {
     @SerializedName("elements")
     private List<Element> elementList;
 
+    @SerializedName("paging")
+    private PagingData pagingData;
+
     @SerializedName("linked")
     private LinkedData linkedData;
 
@@ -21,6 +24,10 @@ public class QueryResult {
             return new ArrayList<>();
         }
         return elementList;
+    }
+
+    public PagingData getPagingData() {
+        return pagingData;
     }
 
     public LinkedData getLinkedData() {

@@ -21,4 +21,14 @@ public class RestImpl implements RestApi {
     public QueryApi getQueryApi() {
         return retrofit.create(QueryApi.class);
     }
+
+    @Override
+    public CourseQueryApi getCourseQueryApi() {
+        return retrofit.create(CourseQueryApi.class);
+    }
+
+    @Override
+    public SpecializationQueryApi getSpecializationQueryApi() {
+        return retrofit.create(SpecializationQueryApi.class);
+    }
 }

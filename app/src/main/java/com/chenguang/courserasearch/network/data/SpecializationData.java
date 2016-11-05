@@ -7,9 +7,6 @@ import java.util.List;
 
 public class SpecializationData extends EntryData {
 
-    @SerializedName("description")
-    private String description;
-
     @SerializedName("tagline")
     private String tagline;
 
@@ -20,10 +17,6 @@ public class SpecializationData extends EntryData {
     private List<String> courseIdList;
 
     public SpecializationData() {
-    }
-
-    public String getDescription() {
-        return description;
     }
 
     public String getTagline() {

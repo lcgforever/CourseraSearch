@@ -3,7 +3,23 @@
 
     <plurals name="course_number_text">
         <item quantity="one">%d course</item>
+        <item quantity="zero">%d courses</item>
+        <item quantity="many">%d courses</item>
         <item quantity="other">%d courses</item>
+    </plurals>
+
+    <plurals name="view_courses_text">
+        <item quantity="one">Click to view associated %d course</item>
+        <item quantity="zero">Click to view associated %d courses</item>
+        <item quantity="many">Click to view associated %d courses</item>
+        <item quantity="other">Click to view associated %d courses</item>
+    </plurals>
+
+    <plurals name="entry_list_total_count_text">
+        <item quantity="one">%d total match</item>
+        <item quantity="zero">%d total matches</item>
+        <item quantity="many">%d total matches</item>
+        <item quantity="other">%d total matches</item>
     </plurals>
 
 </resources>
