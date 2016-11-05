@@ -1,3 +1,19 @@
 <resources>
+
+    <!-- General Strings -->
     <string name="app_name">CourseraSearch</string>
+    <string name="menu_search">Search</string>
+    <string name="action_retry">Retry</string>
+
+    <!-- Search Activity -->
+    <string name="start_search_text">Click the top search icon to start exploring our courses!</string>
+    <string name="search_hint_text">Enter keyword</string>
+    <string name="rest_call_error_message">An error occurred: %s Please retry.</string>
+
+    <!-- Entry Fragment -->
+    <string name="entry_list_empty_text">No matching result for "%s"</string>
+
+    <!-- Error Messages -->
+    <string name="network_error_message">Network connection lost. Please reconnect!</string>
+
 </resources>

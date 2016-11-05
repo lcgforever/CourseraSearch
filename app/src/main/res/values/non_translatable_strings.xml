@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Rest Api -->
+    <string name="rest_base_url" translatable="false">https://api.coursera.org/</string>
+
+</resources>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize"
+    android:background="?attr/colorPrimary">
+
+    <TextView
+        android:id="@+id/toolbar_title_text"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:lines="1"
+        android:maxWidth="200dp"
+        android:text="@string/app_name"
+        android:textAppearance="@style/ToolbarTextAppearance" />
+
+    <android.support.v7.widget.ActionMenuView
+        android:id="@+id/action_menu_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="top|end"
+        android:background="?attr/colorPrimary"
+        android:gravity="center"
+        android:padding="10dp" />
+
+    <include layout="@layout/layout_search_bar" />
+
+    <View
+        android:id="@+id/shadow_view"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_gravity="bottom"
+        android:background="#979797" />
+
+</FrameLayout>
